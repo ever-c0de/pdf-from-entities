@@ -1,6 +1,7 @@
-name: 'pdf_from_entities'
+name: 'PDF from Entities'
 description: 'This module adds functionality to convert your selected entities to PDF files and download it as ZIP-archive.'
 package: 'Custom'
 type: module
 core_version_requirement: ^8.9
-configure: pdf_from_entities.settings
+
+configure: pdf_from_entities.settings_form
