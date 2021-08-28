@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains pdf_from_entities.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function pdf_from_entities_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the pdf_from_entities module.
+    case 'help.page.pdf_from_entities':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Custom module for generating PDFs from entities.') . '</p>';
+      return $output;
+
+    default:
+  }
+}
