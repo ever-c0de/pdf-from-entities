@@ -2,20 +2,20 @@
 
 namespace Drupal\pdf_from_entities\Form;
 
-use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
-use Drupal\Component\Plugin\Exception\PluginNotFoundException;
-use Drupal\Core\Form\ConfigFormBase;
+use Drupal\Core\Batch\BatchBuilder;
+use Drupal\Core\Entity\EntityTypeBundleInfo;
+use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\node\NodeInterface;
+use Drupal\node\NodeStorageInterface;
 use Drupal\Core\Link;
-use Drupal\Core\Messenger\MessengerInterface;
-use Drupal\Core\Url;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  *
  */
-class PdfFromEntitiesForm extends ConfigFormBase {
+class PdfFromEntitiesForm extends FormBase {
 
   /**
    * Entity Type Manager.
@@ -25,23 +25,40 @@ class PdfFromEntitiesForm extends ConfigFormBase {
   protected $entityTypeManager;
 
   /**
-   * The messenger.
+   * An array with available node types.
    *
-   * @var \Drupal\Core\Messenger\MessengerInterface
+   * @var array|mixed
    */
-  protected $messenger;
+  protected $nodeBundles;
+
+  /**
+   * Batch Builder.
+   *
+   * @var \Drupal\Core\Batch\BatchBuilder
+   */
+  protected $batchBuilder;
+
+  /**
+   * Node storage.
+   *
+   * @var \Drupal\node\NodeStorageInterface
+   */
+  protected $nodeStorage;
 
   /**
    * PdfFromEntitiesForm constructor.
    *
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   EntityTypeManager construct.
-   * @param \Drupal\Core\Messenger\MessengerInterface $messenger
-   *   The messenger.
    */
-  public function __construct(EntityTypeManagerInterface $entity_type_manager, MessengerInterface $messenger) {
+  public function __construct(EntityTypeBundleInfo $entity_type_bundle_info, NodeStorageInterface $node_storage, EntityTypeManagerInterface $entity_type_manager) {
+    $this->nodeBundles = $entity_type_bundle_info->getBundleInfo('node');
+    array_walk($this->nodeBundles, function (&$a) {
+      $a = $a['label'];
+    });
     $this->entityTypeManager = $entity_type_manager;
-    $this->messenger = $messenger;
+    $this->nodeStorage = $node_storage;
+    $this->batchBuilder = new BatchBuilder();
   }
 
   /**
@@ -49,21 +66,10 @@ class PdfFromEntitiesForm extends ConfigFormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-        $container->get('entity_type.manager'),
-      $container->get('messenger')
+      $container->get('entity_type.bundle.info'),
+      $container->get('entity_type.manager')->getStorage('node'),
+      $container->get('entity_type.manager')
       );
-  }
-
-  /**
-   * Config name.
-   */
-  const CONFIG_NAME = 'pdf_from_entities.settings';
-
-  /**
-   * {@inheritdoc}
-   */
-  protected function getEditableConfigNames(): array {
-    return [self::CONFIG_NAME];
   }
 
   /**
@@ -77,17 +83,22 @@ class PdfFromEntitiesForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
-    $config = $this->config(self::CONFIG_NAME);
-    $entity_types = $this->getExistingEntities();
-
     $form['entity_types'] = [
       '#type' => 'checkboxes',
-      '#title' => 'Choose entity-types which nodes will be converted to PDF',
-    // '#default_value' => $config['entity_types'] ?? [],
-      '#options' => $entity_types ?? [],
+      '#title' => $this->t('Choose entity-types which nodes will be converted to PDF'),
+      '#options' => $this->nodeBundles,
+      '#required' => TRUE
     ];
 
-    return parent::buildForm($form, $form_state);
+    $form['actions'] = ['#type' => 'actions'];
+    $form['actions']['generate_archive'] = [
+      '#type' => 'submit',
+      '#name' => 'generate_archive',
+      '#value' => $this->t('Generate Archive'),
+      '#button_type' => 'primary',
+    ];
+
+    return $form;
   }
 
   /**
@@ -101,35 +112,106 @@ class PdfFromEntitiesForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $config = $this->config(self::CONFIG_NAME);
+    $entity_types = array_filter($form_state->getValue(['entity_types']));
+      $this->batchBuilder
+        ->setTitle($this->t("Processing"))
+        ->setInitMessage($this->t('Initializing.'))
+        ->setProgressMessage($this->t('Completed @current of @total.'))
+        ->setErrorMessage($this->t('An error has occurred.'));
 
-    $this->messenger()->addStatus($this->t('Configuration saved!'));
+    $this->batchBuilder->addOperation([$this, 'processItems'], [$entity_types]);
+    $this->batchBuilder->setFinishCallback([$this, 'finished']);
+    batch_set($this->batchBuilder->toArray());
+  }
+
+  public function processItems($items, array &$context) {
+    // Elements per operation.
+    $limit = 50;
+
+    // Set default progress values.
+    if (empty($context['sandbox']['progress'])) {
+      $context['sandbox']['progress'] = 0;
+      $context['sandbox']['max'] = count($items);
+    }
+
+    // Save items to array which will be changed during processing.
+    if (empty($context['sandbox']['items'])) {
+      $context['sandbox']['items'] = $items;
+    }
+
+    $counter = 0;
+    if (!empty($context['sandbox']['items'])) {
+      // Remove already processed items.
+      if ($context['sandbox']['progress'] != 0) {
+        array_splice($context['sandbox']['items'], 0, $limit);
+      }
+
+      foreach ($context['sandbox']['items'] as $item) {
+        if ($counter != $limit) {
+          $nodes = $this->getNodes($item);
+          // TODO: Prepare the folder for each content-type.
+          foreach ($nodes as $node) {
+          $this->processItem($node);
+
+          $counter++;
+          $context['sandbox']['progress']++;
+
+          $context['message'] = $this->t('Now processing node :progress of :count', [
+            ':progress' => $context['sandbox']['progress'],
+            ':count' => $context['sandbox']['max'],
+          ]);
+
+          // Increment total processed item values. Will be used in finished
+          // callback.
+          $context['results']['processed'] = $context['sandbox']['progress'];
+          }
+        }
+      }
+    }
+
+    // If not finished all tasks, we count percentage of process. 1 = 100%.
+    if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+      $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+    }
   }
 
   /**
-   * Get notification user types.
+   * Process single item.
+   *
+   * @param int|string $nid
+   *   An id of Node.
+   */
+  public function processItem($nid) {
+    /** @var \Drupal\node\NodeInterface $node */
+    $node = $this->nodeStorage->load($nid);
+    $needed_fields = $node->getFields();
+    // TODO: Call the service that will be generating pdf-files from node
+  }
+
+  /**
+   * Finished callback for batch.
+   */
+  public function finished($success, $results, $operations) {
+    $message = $this->t('Number of nodes affected by batch: @count', [
+      '@count' => $results['processed'],
+    ]);
+
+    $this->messenger()
+      ->addStatus($message);
+  }
+
+
+  /**
+   * Load all nids for specific type.
    *
    * @return array
-   *   User types.
+   *   An array with nids.
    */
-  public function getExistingEntities() :array {
-    $entity_types = NULL;
-    $node_type_storage = $this->entityTypeManager->getStorage('node_type')
-      ->loadMultiple();
-
-    if (isset($node_type_storage)) {
-      foreach ($node_type_storage as $entity) {
-        $entity_types[$entity->get('type')] = $entity->get('name');
-      }
-    } else{
-
-    }
-    $this->messenger
-      ->addWarning($this->t("You don't have any created content-types. Please add at least one @add_entity.",[
-        '@add_entity' => Link::createFromRoute('here','node.type_add')->toString(),
-      ]));
-
-    return $entity_types;
+  public function getNodes($type) {
+    return $this->nodeStorage->getQuery()
+      ->condition('status', NodeInterface::PUBLISHED)
+      ->condition('type', $type)
+      ->execute();
   }
 
 }
