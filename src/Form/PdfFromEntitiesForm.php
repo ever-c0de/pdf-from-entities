@@ -105,10 +105,6 @@ class PdfFromEntitiesForm extends FormBase {
       '#button_type' => 'primary',
     ];
 
-    $test = \Drupal::service('pdf_from_entities.generate_pdf');
-
-    $test->getTestPDF();
-
     return $form;
   }
 
@@ -192,14 +188,18 @@ class PdfFromEntitiesForm extends FormBase {
   public function processItem($nid) {
     /** @var \Drupal\node\NodeInterface $node */
     $node = $this->nodeStorage->load($nid);
-    $needed_fields = $node->getFields();
 
-    $test = \Drupal::service('pdf_from_entities.generate_pdf');
+    $type = $node->getType();
 
-    $test->getTestPDF();
+    $pdf_service = \Drupal::service('pdf_from_entities.generate_pdf');
+
+    if (!$pdf_service->generatePdf($node, $type)) {
+      return false;
+    }
 
     // TODO: Call the service that will be generating pdf-files from node;
     // TODO: Create logic in case If service return NULL;
+    return true;
   }
 
   /**

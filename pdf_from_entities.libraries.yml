@@ -1,0 +1,5 @@
+pdf_from_entities.pdf:
+  version: 1.0
+  css:
+    theme:
+      style/css/style.css: {}

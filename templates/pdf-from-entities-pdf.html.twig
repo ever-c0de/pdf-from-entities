@@ -1,0 +1,26 @@
+{{ attach_library('pdf_from_entities/pdf_from_entities.pdf') }}
+
+{%
+  set fields = [
+  'title',
+  'created',
+  'changed'
+]
+%}
+{{ dump(node) }}
+<div class="main">
+  <header class="main__header">{{ 'Generated at' |t }} {{ date }}</header>
+  <div class="main__container">
+    <h1 class="main__title">{{ node.title.0 }}</h1>
+    <div class="main__content">
+      <div class="date__info">
+        <p>{{ "Created at:"|t }} {{ node.created.0 }}</p>
+        <p>{{ "Last update date-time:"|t }} {{ node.changed.0 }}</p>
+        <span class="date__content">{{ "Content:"|t }}</span>
+      </div>
+      <div class="main__fields">
+        {{ node|without(fields) }}
+      </div>
+    </div>
+  </div>
+</div>

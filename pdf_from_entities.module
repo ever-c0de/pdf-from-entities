@@ -22,3 +22,17 @@ function pdf_from_entities_help($route_name, RouteMatchInterface $route_match) {
     default:
   }
 }
+
+/**
+ * Implements hook_theme().
+ */
+function pdf_from_entities_theme($existing, $type, $theme, $path) {
+  return [
+    'pdf_from_entities_pdf' => [
+      'variables' => [
+        'node' => [],
+        'date' => NULL,
+      ],
+    ],
+  ];
+}
