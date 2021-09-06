@@ -3,17 +3,14 @@
 namespace Drupal\pdf_from_entities\Form;
 
 use Drupal\Core\Archiver\ArchiverManager;
-use Drupal\Core\Archiver\Zip;
 use Drupal\Core\Batch\BatchBuilder;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeBundleInfo;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\node\NodeInterface;
 use Drupal\node\NodeStorageInterface;
-use Drupal\Core\Link;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -222,10 +219,13 @@ class PdfFromEntitiesForm extends FormBase {
     $zip_name = "Content_types_{$time->format('m.d.o_H:i:s')}";
     $file = $this->fileSystem->saveData('', "temporary://{$zip_name}.zip", FileSystemInterface::EXISTS_REPLACE);
     $zip = $this->archiverManager->getInstance(['filepath' => $this->fileSystem->realpath($file)]);
-//    $scan = $this->fileSystem->scanDirectory('/var/www/docroot/web/sites/default/files/temporary/pdf_from_entities/', '.pdf');
-    $zip->getArchive();
-    $zip->add("temporary://pdf_from_entities/article/Article_-_Amet_Imputo.pdf");
-
+    $zip = $zip->getArchive();
+    $folder = $this->fileSystem->scanDirectory($entities_folder . '/article', NULL, ['nomask']);
+    $zip->addFile('/var/www/docroot/web/sites/default/files/temporary/Article_-_Abbas_Appellatio_Euismod_Ideo_Proprius_Quidem.pdf', 'file.pdf');
+    $zip->close();
+//  $scan = $this->fileSystem->scanDirectory('/var/www/docroot/web/sites/default/files/temporary/pdf_from_entities/', '.pdf');
+/*    $zip->getArchive();
+    $zip->add("temporary://pdf_from_entities/article/Article_-_Amet_Imputo.pdf");*/
 //    $this->fileSystem->deleteRecursive($this->getEnititiesFolder());
 
     $message = $this->t('Number of nodes affected by batch: @count', [

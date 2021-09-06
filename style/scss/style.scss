@@ -17,21 +17,12 @@ body {
   @include justify-content(space-between);
 }
 
-.pdf {
+.main {
   min-width: 100%;
   height: inherit;
   margin: 0 auto;
 
-  h2, span {
-    font-size: 11px;
-    color: #000;
-  }
-
-  span {
-    font-weight: 400;
-  }
-
-  .header {
+  &__header {
     width: 100%;
     height: fit-content;
     margin-bottom: 20px;

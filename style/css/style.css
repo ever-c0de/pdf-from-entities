@@ -27,19 +27,12 @@ body {
   justify-content: space-between;
 }
 
-.pdf {
+.main {
   min-width: 100%;
   height: inherit;
   margin: 0 auto;
 }
-.pdf h2, .pdf span {
-  font-size: 11px;
-  color: #000;
-}
-.pdf span {
-  font-weight: 400;
-}
-.pdf .header {
+.main__header {
   width: 100%;
   height: fit-content;
   margin-bottom: 20px;
@@ -66,18 +59,18 @@ body {
   -webkit-align-items: center;
   align-items: center;
 }
-.pdf .header__title h1 {
+.main__header__title h1 {
   width: fit-content;
   font-size: 34px;
   font-weight: 500;
   color: #000;
   font-family: Calibri, Sans-Serif, Helvetica, Arial, serif;
 }
-.pdf .header__logo .logo {
+.main__header__logo .logo {
   width: 200px;
   height: auto;
 }
-.pdf .credentials {
+.main .credentials {
   display: -webkit-box;
   display: -moz-box;
   display: -ms-flexbox;
@@ -97,35 +90,35 @@ body {
   justify-content: space-between;
   margin-bottom: 70px;
 }
-.pdf .credentials h2 {
+.main .credentials h2 {
   margin: 0;
   margin-bottom: -2px;
 }
-.pdf .credentials .client__info {
+.main .credentials .client__info {
   width: 210px;
 }
-.pdf .credentials .client__info h2 {
+.main .credentials .client__info h2 {
   margin: 0;
   margin-bottom: -2px;
 }
-.pdf .credentials .invoice__info h2 {
+.main .credentials .invoice__info h2 {
   margin: 0;
   margin-bottom: 2px;
 }
-.pdf .credentials .invoice__info .invoice__date {
+.main .credentials .invoice__info .invoice__date {
   margin-top: 20px;
 }
-.pdf .credentials .order {
+.main .credentials .order {
   margin-top: 20px;
 }
-.pdf .credentials .ems__info {
+.main .credentials .ems__info {
   width: 180px;
   margin-right: 22px;
 }
-.pdf .credentials .ems__title {
+.main .credentials .ems__title {
   margin: 0;
 }
-.pdf .credentials .ems__address {
+.main .credentials .ems__address {
   display: -webkit-box;
   display: -moz-box;
   display: -ms-flexbox;
@@ -141,16 +134,16 @@ body {
   flex-wrap: wrap;
   line-height: 14px;
 }
-.pdf .credentials .ems__address span {
+.main .credentials .ems__address span {
   margin-bottom: 5px;
 }
-.pdf .credentials .ems__address span:last-child {
+.main .credentials .ems__address span:last-child {
   margin-bottom: 0;
 }
-.pdf .calculation {
+.main .calculation {
   width: 100%;
 }
-.pdf .calculation .head {
+.main .calculation .head {
   width: 100%;
   display: -webkit-box;
   display: -moz-box;
@@ -175,71 +168,71 @@ body {
   -webkit-align-items: center;
   align-items: center;
 }
-.pdf .calculation .head table {
+.main .calculation .head table {
   width: 97%;
   margin-right: auto;
   border-spacing: 0;
 }
-.pdf .calculation .head table thead {
+.main .calculation .head table thead {
   width: 100%;
   margin: 0;
 }
-.pdf .calculation .head table thead tr {
+.main .calculation .head table thead tr {
   margin: 0;
 }
-.pdf .calculation .head table thead tr th {
+.main .calculation .head table thead tr th {
   text-align: right;
   margin: 0;
 }
-.pdf .calculation .head table thead tr th h2 {
+.main .calculation .head table thead tr th h2 {
   font-size: 10px;
 }
-.pdf .calculation .head table thead tr .thead-first {
+.main .calculation .head table thead tr .thead-first {
   text-align: left;
   width: 14%;
 }
-.pdf .calculation .head table thead tr .thead-second {
+.main .calculation .head table thead tr .thead-second {
   text-align: left;
   width: 45%;
 }
-.pdf .calculation .head table thead tr .head__title:first-child {
+.main .calculation .head table thead tr .head__title:first-child {
   padding-left: 5px;
 }
-.pdf .calculation .head table thead tr .head__title:last-child {
+.main .calculation .head table thead tr .head__title:last-child {
   padding-right: 5px;
 }
-.pdf .calculation .head table tbody {
+.main .calculation .head table tbody {
   border-top: 5px solid white;
   width: 100%;
 }
-.pdf .calculation .head table tbody .spacer {
+.main .calculation .head table tbody .spacer {
   height: 7px;
 }
-.pdf .calculation .head table tbody tr {
+.main .calculation .head table tbody tr {
   margin: 0;
 }
-.pdf .calculation .head table tbody tr td {
+.main .calculation .head table tbody tr td {
   text-align: right;
   margin: 0;
 }
-.pdf .calculation .head table tbody tr td span {
+.main .calculation .head table tbody tr td span {
   font-size: 10px;
 }
-.pdf .calculation .head table tbody tr .content__title:first-child {
+.main .calculation .head table tbody tr .content__title:first-child {
   padding-left: 5px;
 }
-.pdf .calculation .head table tbody tr .content__title:last-child {
+.main .calculation .head table tbody tr .content__title:last-child {
   padding-right: 5px;
 }
-.pdf .calculation .head table tbody tr .tbody-first {
+.main .calculation .head table tbody tr .tbody-first {
   text-align: left;
   width: 14%;
 }
-.pdf .calculation .head table tbody tr .tbody-second {
+.main .calculation .head table tbody tr .tbody-second {
   text-align: left;
   width: 45%;
 }
-.pdf .calculation .head__first {
+.main .calculation .head__first {
   display: -webkit-box;
   display: -moz-box;
   display: -ms-flexbox;
@@ -263,17 +256,17 @@ body {
   -webkit-align-items: center;
   align-items: center;
 }
-.pdf .calculation .head__first .head__title {
+.main .calculation .head__first .head__title {
   margin-right: 20px;
 }
-.pdf .calculation .head__first .head__title:last-child {
+.main .calculation .head__first .head__title:last-child {
   margin-right: 0;
 }
-.pdf .calculation .body {
+.main .calculation .body {
   width: 100%;
   margin-top: 30px;
 }
-.pdf .calculation .body table {
+.main .calculation .body table {
   width: 300px;
   margin-left: auto;
   margin-right: 15px;
@@ -281,42 +274,42 @@ body {
   color: #000;
   border-spacing: 0;
 }
-.pdf .calculation .body table tbody tr {
+.main .calculation .body table tbody tr {
   height: 20px;
 }
-.pdf .calculation .body .d-1 {
+.main .calculation .body .d-1 {
   text-align: right;
 }
-.pdf .calculation .body .d-1 span {
+.main .calculation .body .d-1 span {
   font-size: 10px;
   font-weight: 400;
 }
-.pdf .calculation .body .d-1 span.bold {
+.main .calculation .body .d-1 span.bold {
   font-weight: 600;
 }
-.pdf .calculation .body .d-2 {
+.main .calculation .body .d-2 {
   width: 55%;
   text-align: right;
 }
-.pdf .calculation .body .d-2 span {
+.main .calculation .body .d-2 span {
   font-size: 10px;
   font-weight: 400;
 }
-.pdf .calculation .body .d-2 span {
+.main .calculation .body .d-2 span {
   padding-right: 6px;
 }
-.pdf .calculation .body .d-2 span.bold {
+.main .calculation .body .d-2 span.bold {
   font-weight: 600;
 }
-.pdf .calculation .body .second_row {
+.main .calculation .body .second_row {
   padding-top: 5px;
 }
-.pdf .bank-credentials {
+.main .bank-credentials {
   width: 600px;
   margin-top: 25px;
   line-height: 15px;
 }
-.pdf .bank-credentials span {
+.main .bank-credentials span {
   font-size: 11px;
 }
 
