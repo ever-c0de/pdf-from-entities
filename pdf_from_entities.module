@@ -5,6 +5,7 @@
  * Contains pdf_from_entities.module.
  */
 
+use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
@@ -30,8 +31,9 @@ function pdf_from_entities_theme($existing, $type, $theme, $path) {
   return [
     'pdf_from_entities_pdf' => [
       'variables' => [
-        'node' => [],
-        'date' => NULL,
+          'info' => [],
+          'content' => [],
+          'date' => '',
       ],
     ],
   ];

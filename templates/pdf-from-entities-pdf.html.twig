@@ -7,19 +7,22 @@
   'changed'
 ]
 %}
-{{ dump(node) }}
+
 <div class="main">
-  <header class="main__header">{{ 'Generated at' |t }} {{ date }}</header>
+  <header class="main__header">{{ 'Generated at' |t }} {{ date|date('m.d.o - H:i') }}</header>
   <div class="main__container">
-    <h1 class="main__title">{{ node.title.0 }}</h1>
+    <h1 class="main__title">{{ info.title.value }}</h1>
     <div class="main__content">
       <div class="date__info">
-        <p>{{ "Created at:"|t }} {{ node.created.0 }}</p>
-        <p>{{ "Last update date-time:"|t }} {{ node.changed.0 }}</p>
+        <p>{{ "Created at:"|t }} {{ info.created.value|date('m.d.o - H:i') }}</p>
+        <p>{{ "Last update date-time:"|t }} {{ info.changed.value|date('m.d.o - H:i') }}</p>
         <span class="date__content">{{ "Content:"|t }}</span>
       </div>
       <div class="main__fields">
-        {{ node|without(fields) }}
+        {% for element in content %}
+          <div class="field__title">{{ element['#title'] }}</div>
+          <div class="field__content">{{ element|without(element['#title'], element['#label']) }}</div>
+        {% endfor %}
       </div>
     </div>
   </div>

@@ -2,7 +2,10 @@
 
 namespace Drupal\pdf_from_entities\Form;
 
+use Drupal\Core\Archiver\ArchiverManager;
+use Drupal\Core\Archiver\Zip;
 use Drupal\Core\Batch\BatchBuilder;
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeBundleInfo;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormBase;
@@ -46,6 +49,13 @@ class PdfFromEntitiesForm extends FormBase {
    */
   protected $fileSystem;
 
+  /**
+   * The archiver manager.
+   *
+   * @var \Drupal\Core\Archiver\ArchiverManager
+   */
+  protected $archiverManager;
+
   protected function getEnititiesFolder() :string {
     return 'temporary://pdf_from_entities/';
   }
@@ -56,15 +66,16 @@ class PdfFromEntitiesForm extends FormBase {
    * @param \Drupal\Core\File\FileSystemInterface $file_system
    *    The file system service.
    */
-  public function __construct(EntityTypeBundleInfo $entity_type_bundle_info, NodeStorageInterface $node_storage, FileSystemInterface $file_system) {
+  public function __construct(EntityTypeBundleInfo $entity_type_bundle_info, NodeStorageInterface $node_storage, FileSystemInterface $file_system, ArchiverManager $archiver_manager) {
     $this->nodeBundles = $entity_type_bundle_info->getBundleInfo('node');
     array_walk($this->nodeBundles, function (&$a) {
       $a = $a['label'];
     });
     $this->nodeStorage = $node_storage;
     $this->fileSystem = $file_system;
-    $path_pdf_folder = $this->getEnititiesFolder();
-    $this->fileSystem->prepareDirectory($path_pdf_folder, FileSystemInterface::CREATE_DIRECTORY);
+    $entities_folder = $this->getEnititiesFolder();
+    $this->archiverManager = $archiver_manager;
+    $this->fileSystem->prepareDirectory($entities_folder, FileSystemInterface::CREATE_DIRECTORY);
     $this->batchBuilder = new BatchBuilder();
   }
 
@@ -75,7 +86,8 @@ class PdfFromEntitiesForm extends FormBase {
     return new static(
       $container->get('entity_type.bundle.info'),
       $container->get('entity_type.manager')->getStorage('node'),
-      $container->get('file_system')
+      $container->get('file_system'),
+      $container->get('plugin.manager.archiver')
       );
   }
 
@@ -114,9 +126,9 @@ class PdfFromEntitiesForm extends FormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $entity_types = array_filter($form_state->getValue(['entity_types']));
 
+    // Prepare folder for each entity type.
     foreach ($entity_types as $entity_type) {
-      $path_entity_folder =  'temporary://pdf_from_entities/' . $entity_type . '/';
-      $this->fileSystem->prepareDirectory($path_entity_folder, FileSystemInterface::CREATE_DIRECTORY);
+      $this->getNodeFolder($entity_type);
     }
 
     $nodes = $this->getNodes($entity_types);
@@ -134,7 +146,7 @@ class PdfFromEntitiesForm extends FormBase {
 
   public function processItems($items, array &$context) {
     // Elements per operation.
-    $limit = 50;
+    $limit = 15;
 
     // Set default progress values.
     if (empty($context['sandbox']['progress'])) {
@@ -188,12 +200,11 @@ class PdfFromEntitiesForm extends FormBase {
   public function processItem($nid) {
     /** @var \Drupal\node\NodeInterface $node */
     $node = $this->nodeStorage->load($nid);
-
-    $type = $node->getType();
+    $folder = $this->getNodeFolder($node->getType());
 
     $pdf_service = \Drupal::service('pdf_from_entities.generate_pdf');
 
-    if (!$pdf_service->generatePdf($node, $type)) {
+    if (!$pdf_service->generatePdf($node, $folder)) {
       return false;
     }
 
@@ -206,7 +217,16 @@ class PdfFromEntitiesForm extends FormBase {
    * Finished callback for batch.
    */
   public function finished($success, $results, $operations) {
-    $this->fileSystem->deleteRecursive($this->getEnititiesFolder());
+    $time = new DrupalDateTime();
+    $entities_folder = $this->fileSystem->realpath(($this->getEnititiesFolder()));
+    $zip_name = "Content_types_{$time->format('m.d.o_H:i:s')}";
+    $file = $this->fileSystem->saveData('', "temporary://{$zip_name}.zip", FileSystemInterface::EXISTS_REPLACE);
+    $zip = $this->archiverManager->getInstance(['filepath' => $this->fileSystem->realpath($file)]);
+//    $scan = $this->fileSystem->scanDirectory('/var/www/docroot/web/sites/default/files/temporary/pdf_from_entities/', '.pdf');
+    $zip->getArchive();
+    $zip->add("temporary://pdf_from_entities/article/Article_-_Amet_Imputo.pdf");
+
+//    $this->fileSystem->deleteRecursive($this->getEnititiesFolder());
 
     $message = $this->t('Number of nodes affected by batch: @count', [
       '@count' => $results['processed'],
@@ -228,6 +248,14 @@ class PdfFromEntitiesForm extends FormBase {
       ->condition('status', NodeInterface::PUBLISHED)
       ->condition('type', $type, 'IN')
       ->execute();
+  }
+
+  public function getNodeFolder($entity_type) :string {
+    $path_entity_folder = $this->getEnititiesFolder() . $entity_type . '/';
+    if (!($this->fileSystem->prepareDirectory($path_entity_folder, FileSystemInterface::CREATE_DIRECTORY))) {
+      return false;
+    }
+    return $path_entity_folder;
   }
 
 }
