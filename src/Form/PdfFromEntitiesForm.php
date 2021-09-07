@@ -3,6 +3,7 @@
 namespace Drupal\pdf_from_entities\Form;
 
 use Drupal\Core\Archiver\ArchiverManager;
+use ZipArchive;
 use Drupal\Core\Batch\BatchBuilder;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityTypeBundleInfo;
@@ -16,7 +17,6 @@ use Drupal\node\NodeStorageInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use ZipArchive;
 
 /**
  *
@@ -112,9 +112,8 @@ class PdfFromEntitiesForm extends FormBase {
     ];
 
     $form['actions'] = ['#type' => 'actions'];
-    $form['actions']['generate_archive'] = [
+    $form['actions']['submit'] = [
       '#type' => 'submit',
-      '#name' => 'generate_archive',
       '#value' => $this->t('Generate Archive'),
       '#button_type' => 'primary',
     ];
@@ -199,19 +198,24 @@ class PdfFromEntitiesForm extends FormBase {
    * @param int|string $nid
    *   An id of Node.
    */
-  public function processItem($nid) {
+  public function processItem($nid) :bool {
     /** @var \Drupal\node\NodeInterface $node */
     $node = $this->nodeStorage->load($nid);
     $folder = $this->getNodeFolder($node->getType());
 
     $pdf_service = \Drupal::service('pdf_from_entities.generate_pdf');
 
-    if (!$pdf_service->generatePdf($node, $folder)) {
+    if ($pdf_service->generatePdf($node, $folder)) {
+      $link = Url::fromRoute('entity.node.canonical', ['node' => $node->id()]);
+      $message = $this->t('Cannot create template for @title node.', [
+        '@title' => Link::fromTextAndUrl($node->getTitle(), $link)->toString(),
+      ]);
+      $this->messenger()
+        ->addError($message);
+
       return false;
     }
 
-    // TODO: Call the service that will be generating pdf-files from node;
-    // TODO: Create logic in case If service return NULL;
     return true;
   }
 
@@ -248,7 +252,7 @@ class PdfFromEntitiesForm extends FormBase {
    * @return array
    *   An array with nids.
    */
-  public function getNodes($type) {
+  public function getNodes($type): array {
     return $this->nodeStorage->getQuery()
       ->condition('status', NodeInterface::PUBLISHED)
       ->condition('type', $type, 'IN')
@@ -258,13 +262,18 @@ class PdfFromEntitiesForm extends FormBase {
   public function getNodeFolder($entity_type) :string {
     $path_entity_folder = $this->getEnititiesFolder() . $entity_type . '/';
     if (!($this->fileSystem->prepareDirectory($path_entity_folder, FileSystemInterface::CREATE_DIRECTORY))) {
-      // TODO: ADD MESSAGE THAT ENTITY FOLDER CANNOT BE CREATED.
+      $message = $this->t('Cannot create directory for @entity entity type. Please, check your Temporary directory in @link.', [
+        '@entity' => $entity_type,
+        '@link'=> Link::createFromRoute('file system settings', 'system.file_system_settings')->toString(),
+      ]);
+
+      $this->messenger()->addError($message);
       return false;
     }
     return $path_entity_folder;
   }
 
-  protected function getZip($source, $destination){
+  protected function getZip($source, $destination): bool {
     if (!extension_loaded('zip') || !file_exists($source)) {
       return false;
     }
