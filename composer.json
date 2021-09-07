@@ -2,7 +2,7 @@
     "name": "custom/pdf_from_entities",
     "type": "drupal-module",
     "description": "This module adds functionality to convert your selected entities to PDF files and download it as ZIP-archive.",
-    "keywords": ["PDF", "Batch", "Form", "Entities"],
+    "keywords": ["PDF", "Batch", "Form", "Entities", "ZIP"],
     "license": "GPL-2.0-or-later",
     "authors": [
         {
@@ -15,6 +15,7 @@
     "require": {
         "drupal/core": "^8.0",
         "php": ">=7.1",
-        "mikehaertl/phpwkhtmltopdf": "^2.5.0"
+        "mikehaertl/phpwkhtmltopdf": "^2.5.0",
+        "ext-zip": "*"
     }
 }

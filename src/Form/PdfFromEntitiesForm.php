@@ -9,9 +9,14 @@ use Drupal\Core\Entity\EntityTypeBundleInfo;
 use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\node\NodeStorageInterface;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use ZipArchive;
 
 /**
  *
@@ -143,7 +148,7 @@ class PdfFromEntitiesForm extends FormBase {
 
   public function processItems($items, array &$context) {
     // Elements per operation.
-    $limit = 15;
+    $limit = 10;
 
     // Set default progress values.
     if (empty($context['sandbox']['progress'])) {
@@ -215,22 +220,22 @@ class PdfFromEntitiesForm extends FormBase {
    */
   public function finished($success, $results, $operations) {
     $time = new DrupalDateTime();
-    $entities_folder = $this->fileSystem->realpath(($this->getEnititiesFolder()));
-    $zip_name = "Content_types_{$time->format('m.d.o_H:i:s')}";
-    $file = $this->fileSystem->saveData('', "temporary://{$zip_name}.zip", FileSystemInterface::EXISTS_REPLACE);
-    $zip = $this->archiverManager->getInstance(['filepath' => $this->fileSystem->realpath($file)]);
-    $zip = $zip->getArchive();
-    $folder = $this->fileSystem->scanDirectory($entities_folder . '/article', NULL, ['nomask']);
-    $zip->addFile('/var/www/docroot/web/sites/default/files/temporary/Article_-_Abbas_Appellatio_Euismod_Ideo_Proprius_Quidem.pdf', 'file.pdf');
-    $zip->close();
-//  $scan = $this->fileSystem->scanDirectory('/var/www/docroot/web/sites/default/files/temporary/pdf_from_entities/', '.pdf');
-/*    $zip->getArchive();
-    $zip->add("temporary://pdf_from_entities/article/Article_-_Amet_Imputo.pdf");*/
-//    $this->fileSystem->deleteRecursive($this->getEnititiesFolder());
 
-    $message = $this->t('Number of nodes affected by batch: @count', [
-      '@count' => $results['processed'],
-    ]);
+    $entities_folder = $this->fileSystem->realpath(($this->getEnititiesFolder()));
+    $zip_name = "Content_types_{$time->format('m_d_o_H_i_s')}" . '.zip';
+
+    $file = $this->fileSystem->saveData('', "temporary://{$zip_name}", FileSystemInterface::EXISTS_REPLACE);
+    $file = $this->fileSystem->realpath($file);
+
+    if ($this->getZip($entities_folder, $file)) {
+      // TODO: CHANGE TO SERVICE IF NEEDED FOR URL AND LINK
+      $link = Url::fromUserInput("/{$this->fileSystem->getTempDirectory()}/{$zip_name}");
+      $message = $this->t('Link to your ZIP archive containing nodes in PDF format : @link', [
+        '@link' => Link::fromTextAndUrl($this->t('click'), $link)->toString(),
+      ]);
+    }
+
+    $this->fileSystem->deleteRecursive($this->getEnititiesFolder());
 
     $this->messenger()
       ->addStatus($message);
@@ -253,9 +258,53 @@ class PdfFromEntitiesForm extends FormBase {
   public function getNodeFolder($entity_type) :string {
     $path_entity_folder = $this->getEnititiesFolder() . $entity_type . '/';
     if (!($this->fileSystem->prepareDirectory($path_entity_folder, FileSystemInterface::CREATE_DIRECTORY))) {
+      // TODO: ADD MESSAGE THAT ENTITY FOLDER CANNOT BE CREATED.
       return false;
     }
     return $path_entity_folder;
+  }
+
+  protected function getZip($source, $destination){
+    if (!extension_loaded('zip') || !file_exists($source)) {
+      return false;
+    }
+
+    $zip = $this->archiverManager->getInstance(['filepath' => $this->fileSystem->realpath($destination)]);
+    $zip = $zip->getArchive();
+
+    if (!$zip->open($destination, ZIPARCHIVE::CREATE)) {
+      return false;
+    }
+
+    $source = str_replace('\\', '/', realpath($source));
+
+    if (is_dir($source) === true) {
+      $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
+
+      foreach ($files as $file) {
+        $file = str_replace('\\', '/', $file);
+
+        // Ignore "." and ".." folders
+        if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
+          continue;
+
+        $file = realpath($file);
+
+        if (is_dir($file) === true) {
+          $zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
+        }
+        else if (is_file($file) === true)
+        {
+          $zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
+        }
+      }
+    }
+    else if (is_file($source) === true)
+    {
+      $zip->addFromString(basename($source), file_get_contents($source));
+    }
+
+    return $zip->close();
   }
 
 }

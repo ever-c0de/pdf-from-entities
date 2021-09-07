@@ -8,313 +8,64 @@ html {
 }
 
 body {
+  border: 1px solid #0f74a8;
+
   height: 100% !important;
   margin: 0;
   padding: 0;
 
   @include flexbox;
   @include flex-direction(column);
-  @include justify-content(space-between);
+  @include justify-content(flex-start);
+}
+
+img {
+  max-width: 200px;
+  max-height: 200px;
+}
+
+.image__link {
+  display: block;
+  width: auto;
+  height: auto;
 }
 
 .main {
+  border: 1px solid red;
+
   min-width: 100%;
   height: inherit;
   margin: 0 auto;
 
   &__header {
+    border: 1px solid yellow;
+
+    display: block;
     width: 100%;
     height: fit-content;
     margin-bottom: 20px;
-
-    @include flexbox;
-    @include flex-direction(row);
-    @include justify-content(space-between);
-    @include align-items(center);
-
-    &__title h1 {
-      width: fit-content;
-
-      font-size: 34px;
-      font-weight: 500;
-      color: #000;
-      font-family: Calibri, Sans-Serif, Helvetica, Arial, serif;
-    }
-
-    &__logo {
-      .logo {
-        width: 200px;
-        height: auto;
-      }
-    }
+    text-align: right;
   }
 
-  .credentials {
+  &__container {
     @include flexbox;
-    @include flex-direction(row);
+    @include flex-direction(column);
     @include justify-content(space-between);
-
-    margin-bottom: 70px;
-
-    h2 {
-      margin: 0;
-      margin-bottom: -2px;
-    }
-
-    .client__info {
-      width: 210px;
-
-      h2 {
-        margin: 0;
-        margin-bottom: -2px;
-      }
-    }
-
-    .invoice__info {
-      h2 {
-        margin: 0;
-        margin-bottom: 2px;
-      }
-
-      .invoice__date {
-        margin-top: 20px;
-      }
-    }
-
-    .order {
-      margin-top: 20px;
-    }
-
-    .ems {
-      &__info {
-        width: 180px;
-
-        margin-right: 22px;
-      }
-
-      &__title {
-        margin: 0;
-      }
-
-      &__address {
-        @include flexbox;
-        @include flex-direction(column);
-        flex-wrap: wrap;
-        line-height: 14px;
-
-        span {
-          margin-bottom: 5px;
-
-          &:last-child {
-            margin-bottom: 0;
-          }
-        }
-      }
-    }
   }
 
-  .calculation {
+  &__title {
+    display: block;
     width: 100%;
+    text-align: center;
+  }
 
-    .head {
-      width: 100%;
-      @include flexbox;
-      @include flex-direction(column);
-      @include justify-content(space-between);
-      @include align-items(center);
-
-      table {
-        width: 97%;
-        margin-right: auto;
-        border-spacing: 0;
-
-        thead {
-          width: 100%;
-          margin: 0;
-
-          tr {
-            margin: 0;
-
-            th {
-              text-align: right;
-              margin: 0;
-
-              h2 {
-                font-size: 10px;
-              }
-            }
-
-            .thead-first {
-              text-align: left;
-              width: 14%;
-            }
-
-            .thead-second {
-              text-align: left;
-              width: 45%;
-            }
-
-            .head__title {
-              &:first-child {
-                padding-left: 5px;
-              }
-
-              &:last-child {
-                padding-right: 5px;
-              }
-            }
-          }
-        }
-
-        tbody {
-          border-top: 5px solid white;
-          width: 100%;
-
-          .spacer {
-            height: 7px;
-          }
-
-          tr {
-            margin: 0;
-
-            td {
-              text-align: right;
-              margin: 0;
-
-              span {
-                font-size: 10px;
-              }
-            }
-
-            .content__title {
-              &:first-child {
-                padding-left: 5px;
-              }
-
-              &:last-child {
-                padding-right: 5px;
-              }
-            }
-
-            .tbody-first {
-              text-align: left;
-              width: 14%;
-            }
-
-            .tbody-second {
-              text-align: left;
-              width: 45%;
-            }
-
-          }
-        }
-      }
-
-      &__first {
-        @include flexbox;
-        @include flex-direction(row);
-        @include justify-content(flex-start);
-        @include align-items(center);
-
-        .head__title {
-          margin-right: 20px;
-
-          &:last-child {
-            margin-right: 0;
-          }
-        }
-      }
-
+  &__fields {
+    .field__name {
+      font-size: 16px;
     }
-
-    .body {
-      width: 100%;
-      margin-top: 30px;
-
-      table {
-        width: 300px;
-        margin-left: auto;
-        margin-right: 15px;
-
-        font-size: 20px;
-        color: #000;
-        border-spacing: 0;
-
-        tbody {
-          tr {
-            height: 20px;
-          }
-        }
-      }
-
-      .d-1 {
-        span {
-          font-size: 10px;
-          font-weight: 400;
-
-          &.bold {
-            font-weight: 600;
-          }
-        }
-
-        text-align: right;
-      }
-
-      .d-2 {
-        width: 55%;
-
-        span {
-          font-size: 10px;
-          font-weight: 400;
-        }
-
-        text-align: right;
-
-        span {
-          padding-right: 6px;
-
-          &.bold {
-            font-weight: 600;
-          }
-        }
-      }
-
-      .second_row {
-        padding-top: 5px;
-      }
-
+    .field__content {
+      width: 600px;
     }
   }
 
-  .bank-credentials {
-    width: 600px;
-    margin-top: 25px;
-
-    line-height: 15px;
-
-    span {
-      font-size: 11px;
-    }
-  }
-}
-
-.pdf__footer {
-  margin: 0;
-  padding: 0;
-  padding-bottom: 20px;
-  page-break-after: always !important;
-  display: block;
-
-  font-family: Arial, Helvetica, sans-serif;
-  text-align: center;
-
-  &-title {
-    font-size: 13px;
-    font-weight: 700;
-  }
-
-  &-additional {
-    margin-top: -7px;
-    font-size: 11px;
-  }
 }

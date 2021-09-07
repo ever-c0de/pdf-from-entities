@@ -1,13 +1,5 @@
 {{ attach_library('pdf_from_entities/pdf_from_entities.pdf') }}
 
-{%
-  set fields = [
-  'title',
-  'created',
-  'changed'
-]
-%}
-
 <div class="main">
   <header class="main__header">{{ 'Generated at' |t }} {{ date|date('m.d.o - H:i') }}</header>
   <div class="main__container">
@@ -20,8 +12,18 @@
       </div>
       <div class="main__fields">
         {% for element in content %}
-{#          <div class="field__title">{{ element['#title'] }}</div>#}
-          <div class="field__content">{{ element }}</div>
+          <div class="field__name">
+            <h2>{{ element['#field_name'] }}</h2>
+          </div>
+          <div class="field__content">
+          {% if element['#field_type'] == 'image' %}
+              <a class="image__link" target="_blank" href="{{ element.image_url }}">
+                <img src="{{ element.image_url }}" alt="{{ element['#items'].alt }}" title="{{ element['#items'].title }}">
+              </a>
+          {% else %}
+            {{ element }}
+            </div>
+          {% endif %}
         {% endfor %}
       </div>
     </div>
