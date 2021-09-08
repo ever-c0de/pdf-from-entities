@@ -173,7 +173,7 @@ class PdfFromEntitiesPdfService {
       'user-style-sheet' => DRUPAL_ROOT . '/modules/custom/pdf_from_entities/style/css/style.css',
       'margin-top' => 10,
       'margin-right' => 10,
-      'margin-bottom' => 0,
+      'margin-bottom' => 10,
       'margin-left' => 10,
     ];
   }

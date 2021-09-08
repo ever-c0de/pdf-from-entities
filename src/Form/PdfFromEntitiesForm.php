@@ -156,9 +156,9 @@ class PdfFromEntitiesForm extends FormBase {
     $nodes = $this->getNodes($entity_types);
 
     $this->batchBuilder
-      ->setTitle($this->t("Processing"))
-      ->setInitMessage($this->t('Initializing.'))
-      ->setProgressMessage($this->t('Completed @current of @total.'))
+      ->setTitle($this->t("Creating the PDF's from nodes"))
+      ->setInitMessage($this->t("Initializing the generation of PDF's."))
+      ->setProgressMessage($this->t('Approximate completion time: @estimate.'))
       ->setErrorMessage($this->t('An error has occurred.'));
 
     $this->batchBuilder->addOperation([$this, 'processItems'], [$nodes]);
