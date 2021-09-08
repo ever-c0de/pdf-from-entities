@@ -2,14 +2,16 @@
 
 html {
   height: 100% !important;
-
   margin: 0;
   padding: 0;
+
+  h1, h2, p, span {
+    margin: 0;
+    padding: 0;
+  }
 }
 
 body {
-  border: 1px solid #0f74a8;
-
   height: 100% !important;
   margin: 0;
   padding: 0;
@@ -31,15 +33,11 @@ img {
 }
 
 .main {
-  border: 1px solid red;
-
   min-width: 100%;
   height: inherit;
   margin: 0 auto;
 
   &__header {
-    border: 1px solid yellow;
-
     display: block;
     width: 100%;
     height: fit-content;
@@ -54,17 +52,41 @@ img {
   }
 
   &__title {
+    font-size: 30px;
+    text-transform: uppercase;
+
     display: block;
     width: 100%;
     text-align: center;
+
+    margin-top: 15px;
+    margin-bottom: 20px;
+  }
+
+  &__content {
+    .date__info {
+      @include flexbox;
+      @include flex-direction(column);
+      @include justify-content(flex-start);
+
+      margin-bottom: 10px;
+    }
   }
 
   &__fields {
     .field__name {
       font-size: 16px;
+
+      margin-top: 5px;
+      margin-bottom: 10px;
     }
     .field__content {
-      width: 600px;
+      width: 700px;
+
+      margin-bottom: 10px;
+      p {
+        text-align: justify;
+      }
     }
   }
 

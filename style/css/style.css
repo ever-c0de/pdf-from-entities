@@ -3,9 +3,12 @@ html {
   margin: 0;
   padding: 0;
 }
+html h1, html h2, html p, html span {
+  margin: 0;
+  padding: 0;
+}
 
 body {
-  border: 1px solid #0f74a8;
   height: 100% !important;
   margin: 0;
   padding: 0;
@@ -40,13 +43,11 @@ img {
 }
 
 .main {
-  border: 1px solid red;
   min-width: 100%;
   height: inherit;
   margin: 0 auto;
 }
 .main__header {
-  border: 1px solid yellow;
   display: block;
   width: 100%;
   height: fit-content;
@@ -73,15 +74,45 @@ img {
   justify-content: space-between;
 }
 .main__title {
+  font-size: 30px;
+  text-transform: uppercase;
   display: block;
   width: 100%;
   text-align: center;
+  margin-top: 15px;
+  margin-bottom: 20px;
+}
+.main__content .date__info {
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-box-direction: normal;
+  -webkit-box-orient: vertical;
+  -moz-box-direction: normal;
+  -moz-box-orient: vertical;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: start;
+  -moz-box-pack: start;
+  -ms-flex-pack: start;
+  -webkit-justify-content: flex-start;
+  justify-content: flex-start;
+  margin-bottom: 10px;
 }
 .main__fields .field__name {
   font-size: 16px;
+  margin-top: 5px;
+  margin-bottom: 10px;
 }
 .main__fields .field__content {
-  width: 600px;
+  width: 700px;
+  margin-bottom: 10px;
+}
+.main__fields .field__content p {
+  text-align: justify;
 }
 
 /*# sourceMappingURL=style.css.map */

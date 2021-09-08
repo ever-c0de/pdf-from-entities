@@ -1,4 +1,4 @@
-# This configuration form shows the existing content-types and provides a functionality for generating PDF's using Batch API.
+# This base form shows the existing content-types and provides a functionality for generating PDF's using Batch API.
 pdf_from_entities.settings_form:
   path: '/admin/config/development/generate-pdf-content'
   defaults:

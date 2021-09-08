@@ -1,4 +1,4 @@
 services:
   pdf_from_entities.generate_pdf:
     class: Drupal\pdf_from_entities\Service\PdfFromEntitiesPdfService
-    arguments: ['@renderer']
+    arguments: ['@renderer', '@logger.channel.default', '@messenger']

@@ -31,9 +31,9 @@ function pdf_from_entities_theme($existing, $type, $theme, $path): array {
   return [
     'pdf_from_entities_pdf' => [
       'variables' => [
-          'info' => [],
-          'content' => [],
-          'date' => '',
+        'info' => [],
+        'content' => [],
+        'date' => '',
       ],
     ],
   ];

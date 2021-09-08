@@ -1,4 +1,4 @@
-gl_project.admin.settings_form:
+pdf_from_entities.admin.settings_form:
   title: 'PDF from Entities'
   description: 'Settings for Custom project module'
   route_name: pdf_from_entities.settings_form
