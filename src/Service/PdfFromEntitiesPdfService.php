@@ -3,13 +3,14 @@
 namespace Drupal\pdf_from_entities\Service;
 
 use Drupal\Core\Datetime\DrupalDateTime;
-use Drupal\Core\Field\FieldItemList;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\Core\Url;
 use mikehaertl\wkhtmlto\Pdf;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ *
+ */
 class PdfFromEntitiesPdfService {
 
   /**
@@ -38,46 +39,55 @@ class PdfFromEntitiesPdfService {
     $this->renderer = $renderer;
   }
 
+  /**
+   *
+   */
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('renderer')
     );
   }
 
-  function generatePdf($node, $folder) {
+  /**
+   *
+   */
+  public function generatePdf($node, $folder) {
     $template = $this->generateTemplate($node);
 
     if (!$template) {
-      return false;
+      return FALSE;
     }
 
     $pdf = new Pdf($template);
     $pdf->setOptions($this->getPdfOptions());
     $pdf_name = preg_replace('/\s+/', '_', $node->getTitle());
 
-    // Save the PDF
+    // Save the PDF.
     if (!$pdf->saveAs($folder . $pdf_name . '.pdf')) {
       $error = $pdf->getError();
     }
 
     unset($pdf);
-    return true;
+    return TRUE;
   }
 
+  /**
+   *
+   */
   public function generateTemplate($node) {
     $date = $this->date;
     $fields = $node->getFields();
     $admin_fields = ['title', 'created', 'changed', 'uid'];
 
-    /** @var FieldItemList $field */
+    /** @var \Drupal\Core\Field\FieldItemList $field */
     foreach ($fields as $field) {
       $name = $field->getName();
       if (in_array($name, $admin_fields)) {
         $info[$name] = $field->getValue()[0];
       }
 
-        $full_field = $field->view('full');
-      if ($field->getFieldDefinition()->getType() == 'image'){
+      $full_field = $field->view('full');
+      if ($field->getFieldDefinition()->getType() == 'image') {
         $image_url = $field->entity->getFileUri();
         $image_url = file_create_url($image_url);
         $full_field['image_url'] = $image_url;
@@ -92,7 +102,7 @@ class PdfFromEntitiesPdfService {
       '#theme' => 'pdf_from_entities_pdf',
       '#info' => $info,
       '#content' => $content,
-      '#date' => $date
+      '#date' => $date,
     ];
 
     $html = $this->renderer
@@ -103,6 +113,9 @@ class PdfFromEntitiesPdfService {
     return $result->getContent();
   }
 
+  /**
+   *
+   */
   protected function getPdfOptions() {
     return [
       'no-outline',
